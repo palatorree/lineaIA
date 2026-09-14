@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia de la IA - Línea del Tiempo Interactiva</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --bg-dark: #050508;
+            --card-bg: rgba(13, 15, 24, 0.8);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.05) 0%, transparent 35%),
+                radial-gradient(circle at 90% 80%, rgba(188, 19, 254, 0.05) 0%, transparent 35%),
+                linear-gradient(rgba(5, 5, 8, 0.9), rgba(5, 5, 8, 0.9)),
+                url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .font-futuristic {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Utilidades Neon */
+        .text-shadow-cyan { text-shadow: 0 0 15px rgba(0, 243, 255, 0.8); }
+        .text-shadow-purple { text-shadow: 0 0 15px rgba(188, 19, 254, 0.8); }
+
+        .border-neon-blue {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2), inset 0 0 5px rgba(0, 243, 255, 0.1);
+        }
+
+        .border-neon-purple {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.2), inset 0 0 5px rgba(188, 19, 254, 0.1);
+        }
+
+        .btn-reveal {
+            background: linear-gradient(45deg, #00f3ff, #bc13fe, #00f3ff);
+            background-size: 200% 200%;
+            animation: gradientShift 4s ease infinite;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .btn-reveal:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(188, 19, 254, 0.5);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Animaciones para las tarjetas */
+        .reveal-anim { animation: slideLeftFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes slideLeftFade {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .year-reveal-anim { animation: pulseYear 1s ease forwards; }
+
+        @keyframes pulseYear {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 20px currentColor; }
+            100% { transform: scale(1); opacity: 1; text-shadow: 0 0 10px currentColor; }
+        }
+
+        /* Efecto de celebración "¡Lo tengo!" */
+        .celebrate-glow {
+            animation: pulseGlow 2s infinite alternate;
+            border-color: #00ff66 !important;
+        }
+
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 10px rgba(0,255,102,0.3), inset 0 0 5px rgba(0,255,102,0.1); }
+            to { box-shadow: 0 0 25px rgba(0,255,102,0.6), inset 0 0 10px rgba(0,255,102,0.3); }
+        }
+
+        /* Caja misteriosa */
+        .mystery-box {
+            background: rgba(20, 22, 35, 0.5);
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+        }
+
+        .mystery-box:hover {
+            border-color: rgba(0, 243, 255, 0.4);
+            background: rgba(0, 243, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .timeline-line {
+            width: 4px;
+            background: linear-gradient(to bottom, transparent, var(--neon-blue), var(--neon-purple), transparent);
+            position: absolute;
+            left: 32px; /* Posición móvil */
+            top: 0;
+            bottom: 0;
+            z-index: 0;
+            border-radius: 4px;
+        }
+        
+        @media (min-width: 768px) {
+            .timeline-line { 
+                left: 50%; /* Posición escritorio centrado */
+                transform: translateX(-50%); 
+            }
+        }
+
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #2a2d42; border-radius: 5px; border: 2px solid var(--bg-dark); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+
+        .glass-panel {
+            background: rgba(15, 17, 26, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-20 selection:bg-cyan-500 selection:text-black">
+
+    <header class="pt-20 pb-12 text-center px-4 relative z-10">
+        <div class="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 mb-6 backdrop-blur-sm">
+            <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+            <span class="text-cyan-300 font-futuristic text-xs tracking-widest uppercase">Módulo 2.º de Secundaria</span>
+        </div>
+        <h1 class="text-5xl md:text-7xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 font-futuristic drop-shadow-2xl tracking-tight">
+            HISTORIA DE LA IA
+        </h1>
+        <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
+            Un viaje en el tiempo. Descubre cómo pasamos de computadoras del tamaño de una habitación a la inteligencia en nuestros bolsillos. <strong class="text-gray-200">Prepara tu investigación y reclama tus descubrimientos.</strong>
+        </p>
+    </header>
+
+    <div class="sticky top-6 z-50 flex justify-center mb-20 px-4 pointer-events-none">
+        <button id="btnReveal" onclick="revealNextEvent()" class="pointer-events-auto btn-reveal text-white font-futuristic text-base md:text-lg px-8 py-4 rounded-full flex items-center gap-3 shadow-2xl">
+            <span>REVELAR SIGUIENTE</span>
+            <svg class="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </button>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 relative z-10">
+        <div class="relative">
+            <!-- Línea brillante -->
+            <div class="timeline-line"></div>
+            
+            <!-- Contenedor dinámico donde se inyectan los eventos -->
+            <div id="timelineContainer" class="flex flex-col gap-8 md:gap-16 relative z-10">
+                <!-- Se llena vía JS -->
+            </div>
+        </div>
+
+        <div class="mt-32 flex justify-center">
+            <button onclick="openModal()" class="group relative px-8 py-5 font-futuristic text-cyan-400 border border-cyan-500/50 bg-black/40 backdrop-blur-sm rounded-2xl overflow-hidden transition-all hover:text-black shadow-[0_0_20px_rgba(0,243,255,0.1)] hover:shadow-[0_0_30px_rgba(0,243,255,0.4)] hover:border-cyan-400">
+                <div class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                <span class="relative z-10 flex items-center gap-3 text-lg font-bold tracking-wide">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    AGREGAR "EL EVENTO RARO"
+                </span>
+            </button>
+        </div>
+    </main>
+
+    <section class="max-w-5xl mx-auto px-4 mt-32 relative z-10">
+        <div class="glass-panel p-8 md:p-12 rounded-3xl border-2 border-cyan-500/30 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 bg-gradient-to-br from-[#0b0d14] to-[#141623]">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="w-full md:w-1/3 relative z-10">
+                <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=600&q=80" onerror="this.onerror=null; this.src='https://placehold.co/600x600/1a1d2d/00f3ff?text=Robot+Optimus';" alt="Robot humanoide" class="w-full rounded-2xl border border-cyan-500/50 shadow-[0_0_30px_rgba(0,243,255,0.2)]">
+            </div>
+            
+            <div class="w-full md:w-2/3 z-10">
+                <div class="inline-block px-4 py-1 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs font-futuristic tracking-widest mb-4">
+                    DATO EXTRA • FUTURO CERCANO
+                </div>
+                <h2 class="text-3xl md:text-5xl font-futuristic text-white mb-4">
+                    Tesla Optimus: <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">El Robot Humanoide</span>
+                </h2>
+                <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                    Anunciado por Elon Musk, el <strong>Tesla Bot (Optimus)</strong> es un robot humanoide bipedal de propósito general. Fue diseñado para realizar tareas peligrosas, repetitivas o aburridas que los humanos prefieren no hacer. Según los últimos avances en inteligencia artificial espacial, se prevé que pueda estar a la venta y operativo en entornos de producción e incluso domésticos alrededor del <strong>2027</strong>. ¡La IA ya no solo vive en las pantallas, sino que interactuará físicamente con nuestro mundo!
+                </p>
+                <div class="flex items-center gap-4 text-cyan-400 font-bold">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Fusión de IA Avanzada y Robótica
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-5xl mx-auto px-4 mt-32 mb-20 relative z-10">
+        <div class="text-center mb-16 glass-panel p-10 rounded-3xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+            <h2 class="text-4xl md:text-5xl font-futuristic text-white mb-4">DESAFÍO: <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">¿REAL O I.A.?</span></h2>
+            <p class="text-gray-400 text-lg max-w-2xl mx-auto">Pon a prueba tu intuición visual. Observa las siguientes imágenes y deduce si fueron capturadas por una cámara o generadas por algoritmos.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="gameContainer">
+            <!-- Las tarjetas del juego se generarán con JS -->
+        </div>
+    </section>
+
+    <div id="rareEventModal" class="fixed inset-0 bg-black/90 backdrop-blur-lg hidden items-center justify-center z-[100] opacity-0 transition-opacity duration-300">
+        <div class="bg-[#0b0d14] border border-cyan-500/30 rounded-3xl p-8 max-w-md w-full mx-4 shadow-[0_0_50px_rgba(0,243,255,0.15)] transform scale-95 transition-transform duration-300 relative overflow-hidden" id="modalContent">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500"></div>
+            
+            <h3 class="text-3xl font-futuristic text-white mb-2">Nuevo Nodo</h3>
+            <p class="text-gray-400 mb-8 text-sm">Ingresa los datos de tu investigación para sincronizarlos con la línea del tiempo principal.</p>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-cyan-400 text-xs tracking-widest mb-2 font-futuristic uppercase">Año del Evento</label>
+                    <input type="text" id="inputYear" placeholder="Ej: 2018" class="w-full bg-black/50 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all placeholder-gray-600">
+                </div>
+                <div>
+                    <label class="block text-cyan-400 text-xs tracking-widest mb-2 font-futuristic uppercase">Título del Evento</label>
+                    <input type="text" id="inputTitle" placeholder="Ej: AlphaGo hace historia" class="w-full bg-black/50 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all placeholder-gray-600">
+                </div>
+                <div>
+                    <label class="block text-cyan-400 text-xs tracking-widest mb-2 font-futuristic uppercase">Breve Descripción</label>
+                    <textarea id="inputDesc" rows="3" placeholder="¿Qué pasó y por qué es importante?" class="w-full bg-black/50 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all resize-none placeholder-gray-600"></textarea>
+                </div>
+                <div>
+                    <label class="block text-cyan-400 text-xs tracking-widest mb-2 font-futuristic uppercase">Investigador (Opcional)</label>
+                    <input type="text" id="inputStudent" placeholder="Tu nombre" class="w-full bg-black/50 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all placeholder-gray-600">
+                </div>
+            </div>
+
+            <div class="mt-10 flex gap-4">
+                <button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-700 text-gray-400 font-bold rounded-xl hover:bg-gray-800 hover:text-white transition-colors">Cancelar</button>
+                <button onclick="saveRareEvent()" class="flex-1 px-4 py-3 bg-cyan-500 text-black font-black uppercase rounded-xl hover:bg-cyan-400 transition-all shadow-[0_0_20px_rgba(0,243,255,0.3)] hover:shadow-[0_0_30px_rgba(0,243,255,0.6)]">Sincronizar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Datos de la línea del tiempo con imágenes acordes a la historia de la IA */
+        const timelineData = [
+            {
+                year: "1950",
+                title: "Test de Turing",
+                desc: "Alan Turing propone el 'Juego de la Imitación'. Una prueba fundamental: Si un humano no puede distinguir si está conversando con una máquina o con otro humano, la máquina ha demostrado inteligencia.",
+                img: "images/alanturing.png", 
+                color: "blue"
+            },
+            {
+                year: "1957",
+                title: "El Perceptrón",
+                desc: "Frank Rosenblatt crea un algoritmo y hardware (Mark I Perceptron) que imita una neurona humana. Fue el primer paso tangible hacia las 'Redes Neuronales Artificiales' modernas.",
+                img: "images/percepton.jpeg", 
+                color: "purple"
+            },
+            {
+                year: "1959",
+                title: "Machine Learning",
+                desc: "Arthur Samuel programa una computadora para jugar a las Damas que mejora mientras más juega. Él acuña oficialmente el término 'Aprendizaje Automático' (Machine Learning).",
+                img: "images/machinelearning.jpeg", 
+                color: "blue"
+            },
+            {
+                year: "1966",
+                title: "ELIZA, la primera chatbot",
+                desc: "Joseph Weizenbaum en el MIT crea ELIZA, un programa que simula ser un psicoterapeuta. Aunque solo reestructuraba frases mediante reglas simples, la gente sentía empatía real hacia ella.",
+                img: "images/eliza.png", 
+                color: "purple"
+            },
+            {
+                year: "1997",
+                title: "Deep Blue vs Kasparov",
+                desc: "Un hito histórico mediático: La supercomputadora Deep Blue de IBM vence al entonces campeón mundial de ajedrez Garry Kasparov, demostrando el poder del cálculo bruto y la estrategia.",
+                img: "images/deepblue}.jpeg", 
+                color: "blue"
+            },
+            {
+                year: "2011",
+                title: "Watson gana en Jeopardy!",
+                desc: "La IA de IBM compite en televisión en el complejo juego 'Jeopardy!'. Derrota a los campeones humanos demostrando una capacidad asombrosa para entender el lenguaje natural y juegos de palabras.",
+                img: "images/watson.jpeg", 
+                color: "purple"
+            },
+            {
+                year: "2014",
+                title: "Asistentes en tu Bolsillo",
+                desc: "Se popularizan Siri, Alexa y Google Assistant. Gracias a los avances en redes neuronales, el reconocimiento de voz mejora drásticamente y hablar con máquinas se vuelve cotidiano.",
+                img: "images/siri.jpeg", 
+                color: "blue"
+            },
+            {
+                year: "2020",
+                title: "GPT-3 asombra al mundo",
+                desc: "OpenAI presenta un Modelo de Lenguaje Grande (LLM) con 175 mil millones de parámetros. Su capacidad para generar texto coherente, traducir y programar dejó al mundo tecnológico atónito.",
+                img: "images/gtp3.jpeg", 
+                color: "purple"
+            },
+            {
+                year: "2022",
+                title: "La explosión del Arte IA",
+                desc: "Modelos como Midjourney, DALL-E 2 y Stable Diffusion democratizan la creación visual. Con una simple descripción de texto (prompt), la IA genera pinturas, fotografías y diseños hiperrealistas en segundos.",
+                img: "images/dalle.jpg", 
+                color: "blue"
+            },
+            {
+                year: "2023",
+                title: "ChatGPT cambia las reglas",
+                desc: "La IA conversacional llega al público masivo. Estudiantes, programadores y profesionales de todo el mundo descubren un 'copiloto' que revoluciona permanentemente la forma en la que trabajamos y estudiamos.",
+                img: "images/chatgpt.png", 
+                color: "purple"
+            },
+            {
+                year: "2024",
+                title: "El Video Generativo (Sora)",
+                desc: "Herramientas como Sora de OpenAI asombran al mundo generando videos hiperrealistas y coherentes a partir de simples textos, difuminando por completo la línea entre el metraje real y la simulación generada.",
+                img: "images/sora.jpeg", 
+                color: "blue"
+            },
+            {
+                year: "2025",
+                title: "Era de los Agentes Autónomos",
+                desc: "Los sistemas de IA pasan de ser simples chats a 'Agentes'. Ahora pueden navegar por internet, usar aplicaciones de escritorio, coordinar agendas y realizar tareas digitales complejas de manera autónoma con mínima supervisión.",
+                img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
+                color: "purple"
+            },
+            {
+                year: "2026",
+                title: "IA Espacial y Wearables",
+                desc: "La IA se libera de las pantallas tradicionales. Modelos multimodales en tiempo real se integran masivamente en gafas inteligentes, analizando visualmente el mundo que te rodea y ofreciendo asistencia contextual al instante.",
+                img: "images/2026.jpeg", 
+                color: "blue"
+            }
+        ];
+
+        let currentRevealIndex = 0;
+        const timelineContainer = document.getElementById('timelineContainer');
+        const btnReveal = document.getElementById('btnReveal');
+
+        function initTimeline() {
+            timelineContainer.innerHTML = '';
+            timelineData.forEach((event, index) => renderEventRow(event, index));
+            updateRevealButton();
+            initGame();
+        }
+
+        function renderEventRow(event, index) {
+            const rowObj = document.createElement('div');
+            // Layout flex: En móvil es columna, en escritorio es fila (Año a la izquierda, Tarjeta a la derecha)
+            rowObj.className = `flex flex-col md:flex-row w-full relative group mb-4`; 
+            rowObj.id = `event-row-${index}`;
+            rowObj.innerHTML = generateLayoutHTML(event, index);
+            timelineContainer.appendChild(rowObj);
+        }
+
+        function generateLayoutHTML(event, index) {
+            const isEven = index % 2 === 0;
+            
+            return `
+                <div class="flex flex-col md:flex-row w-full relative mb-12 md:mb-16 group">
+                    <!-- Nodo Mobile -->
+                    <div class="md:hidden absolute left-[32px] transform -translate-x-1/2 mt-6 w-8 h-8 rounded-full border-4 border-[#0b0d14] bg-[#141623] z-10 transition-all duration-700" id="node-mobile-${index}">
+                        <div class="w-2.5 h-2.5 rounded-full bg-gray-700 m-auto mt-1.5 transition-colors duration-500" id="node-inner-mobile-${index}"></div>
+                    </div>
+                    
+                    <!-- Nodo Desktop (Centrado) -->
+                    <div class="hidden md:flex absolute left-1/2 transform -translate-x-1/2 mt-6 w-10 h-10 rounded-full border-4 border-[#0b0d14] bg-[#141623] z-10 transition-all duration-700 items-center justify-center" id="node-desktop-${index}">
+                        <div class="w-3 h-3 rounded-full bg-gray-700 transition-colors duration-500" id="node-inner-desktop-${index}"></div>
+                    </div>
+
+                    <!-- Columna Año (Escritorio) -->
+                    <div class="hidden md:flex w-1/2 ${isEven ? 'pr-16 justify-end text-right' : 'pl-16 justify-start text-left order-2'} pt-6">
+                        <div id="year-desktop-${index}" class="text-5xl lg:text-7xl font-futuristic font-bold text-gray-700 opacity-20 transition-all duration-700 tracking-tighter">
+                            ${event.year}
+                        </div>
+                    </div>
+
+                    <!-- Columna Tarjeta -->
+                    <div class="w-full md:w-1/2 pl-20 ${isEven ? 'md:pl-16 md:pr-0' : 'md:pr-16 md:pl-0 order-1'} flex flex-col justify-start relative">
+                        
+                        <!-- Año Móvil -->
+                        <div class="md:hidden mb-4 pt-4">
+                            <span id="year-mobile-${index}" class="text-4xl font-futuristic font-bold text-gray-600 opacity-40 transition-all duration-700 tracking-tighter">
+                                ${event.year}
+                            </span>
+                        </div>
+
+                        <!-- Contenedor Carta -->
+                        <div class="relative w-full max-w-xl ${!isEven ? 'md:ml-auto' : ''}">
+                            <!-- Caja Oculta -->
+                            <div id="mystery-content-${index}" class="mystery-box rounded-2xl p-8 w-full flex flex-col items-center justify-center min-h-[200px] border border-gray-700/50">
+                                <div class="text-5xl text-gray-600 font-futuristic opacity-30 mb-3 animate-pulse">?</div>
+                                <div class="text-gray-500 text-xs uppercase tracking-widest font-bold text-center">Datos Clasificados</div>
+                            </div>
+
+                            <!-- Tarjeta Revelada -->
+                            <div id="card-content-${index}" class="hidden w-full transition-all duration-500">
+                                <!-- El HTML de la tarjeta se inyectará aquí -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function revealNextEvent() {
+            if (currentRevealIndex >= timelineData.length) return;
+
+            const index = currentRevealIndex;
+            const event = timelineData[index];
+
+            // 1. Estilizar Nodos (Mobile y Desktop)
+            const nodeDesktop = document.getElementById(`node-desktop-${index}`);
+            const nodeInnerDesktop = document.getElementById(`node-inner-desktop-${index}`);
+            const nodeMobile = document.getElementById(`node-mobile-${index}`);
+            const nodeInnerMobile = document.getElementById(`node-inner-mobile-${index}`);
+            
+            // 2. Estilizar Años (Escritorio y Móvil)
+            const yearDesktop = document.getElementById(`year-desktop-${index}`);
+            const yearMobile = document.getElementById(`year-mobile-${index}`);
+            
+            const processNode = (node, innerNode, isBlue) => {
+                if(!node || !innerNode) return;
+                if(isBlue) {
+                    node.classList.replace('border-[#0b0d14]', 'border-cyan-400');
+                    node.classList.add('shadow-[0_0_20px_rgba(0,243,255,0.6)]');
+                    innerNode.classList.replace('bg-gray-700', 'bg-cyan-300');
+                } else {
+                    node.classList.replace('border-[#0b0d14]', 'border-purple-500');
+                    node.classList.add('shadow-[0_0_20px_rgba(188,19,254,0.6)]');
+                    innerNode.classList.replace('bg-gray-700', 'bg-purple-400');
+                }
+            };
+
+            const isBlue = event.color === 'blue';
+            processNode(nodeDesktop, nodeInnerDesktop, isBlue);
+            processNode(nodeMobile, nodeInnerMobile, isBlue);
+            
+            [yearDesktop, yearMobile].forEach(el => {
+                if(el) {
+                    const textColor = isBlue ? 'text-cyan-400' : 'text-purple-400';
+                    const baseSize = el.id.includes('mobile') ? 'text-4xl' : 'text-5xl lg:text-7xl';
+                    el.className = `${baseSize} font-futuristic font-bold ${textColor} transition-all duration-700 tracking-tighter year-reveal-anim`;
+                }
+            });
+
+            // 3. Ocultar misterio y mostrar tarjeta
+            const mysteryBox = document.getElementById(`mystery-content-${index}`);
+            const cardContent = document.getElementById(`card-content-${index}`);
+            
+            if (mysteryBox) mysteryBox.classList.add('hidden');
+            if (cardContent) {
+                cardContent.innerHTML = generateCardHTML(event, index);
+                cardContent.classList.remove('hidden');
+                cardContent.classList.add('reveal-anim');
+            }
+
+            // 4. Scroll suave hacia el nuevo evento
+            setTimeout(() => {
+                const scrollOffset = window.innerWidth < 768 ? 150 : 200;
+                const elementPosition = document.getElementById(`event-row-${index}`).getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - scrollOffset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+            }, 100);
+
+            currentRevealIndex++;
+            updateRevealButton();
+        }
+
+        function generateCardHTML(event, index) {
+            const isBlue = event.color === 'blue';
+            const borderColor = isBlue ? 'border-cyan-500/50' : 'border-purple-500/50';
+            const shadowColor = isBlue ? 'shadow-[0_10px_30px_rgba(0,243,255,0.15)]' : 'shadow-[0_10px_30px_rgba(188,19,254,0.15)]';
+            const badgeBg = isBlue ? 'bg-cyan-500' : 'bg-purple-500';
+            
+            return `
+                <div class="glass-panel border-2 ${borderColor} rounded-2xl overflow-hidden ${shadowColor} relative transform transition-all duration-300 hover:-translate-y-1" id="event-card-${index}">
+                    <!-- Imagen en la parte superior de la tarjeta -->
+                    <div class="h-48 md:h-64 w-full overflow-hidden relative group">
+                        <img src="${event.img}" alt="${event.title}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0f111a] via-transparent to-transparent"></div>
+                        <div class="absolute top-4 right-4 ${badgeBg} text-black text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                            Desbloqueado
+                        </div>
+                    </div>
+                    
+                    <!-- Contenido de texto bajo la imagen -->
+                    <div class="p-6 md:p-8 relative z-10">
+                        <h3 class="text-white font-futuristic text-2xl md:text-3xl font-bold mb-3">${event.title}</h3>
+                        <p class="text-gray-300 text-sm md:text-base leading-relaxed mb-6 opacity-90">${event.desc}</p>
+                        
+                        <!-- Botón Interactivo de Clase -->
+                        <button onclick="markHomework(this, 'event-card-${index}')" class="w-full py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs md:text-sm transition-all duration-300 bg-[#1a1d2d] text-gray-300 border border-gray-600 hover:bg-gray-800 hover:border-gray-400 flex justify-center items-center gap-2 group/btn">
+                            <svg class="w-5 h-5 text-gray-400 group-hover/btn:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            ¡Lo tengo en mi investigación!
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function markHomework(button, cardId) {
+            const card = document.getElementById(cardId);
+            if (!card.classList.contains('celebrate-glow')) {
+                card.classList.add('celebrate-glow');
+                button.innerHTML = `
+                    <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    ¡Anotado por la clase!
+                `;
+                button.className = "w-full py-3.5 rounded-xl font-black uppercase tracking-wider text-xs md:text-sm transition-all duration-300 bg-[#00ff66] border border-[#00ff66] text-black flex justify-center items-center gap-2 shadow-[0_0_20px_rgba(0,255,102,0.4)] transform scale-[1.02]";
+            }
+        }
+
+        function updateRevealButton() {
+            if (currentRevealIndex >= timelineData.length) {
+                btnReveal.innerHTML = `
+                    <span class="text-gray-400">LÍNEA COMPLETADA</span>
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                `;
+                btnReveal.className = "pointer-events-none bg-[#11131f] border border-gray-700 text-gray-400 font-futuristic text-base md:text-lg px-8 py-4 rounded-full flex items-center gap-3";
+            }
+        }
+
+        const modal = document.getElementById('rareEventModal');
+        const modalContent = document.getElementById('modalContent');
+
+        function openModal() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                
+                // Limpiar form
+                ['inputYear', 'inputTitle', 'inputDesc', 'inputStudent'].forEach(id => document.getElementById(id).value = '');
+            }, 300);
+        }
+
+        function saveRareEvent() {
+            const year = document.getElementById('inputYear').value.trim() || '????';
+            const title = document.getElementById('inputTitle').value.trim() || 'Evento Desconocido';
+            let desc = document.getElementById('inputDesc').value.trim() || 'Un nodo de datos anómalo ha sido detectado en la línea temporal.';
+            const student = document.getElementById('inputStudent').value.trim();
+
+            if (student) desc += ` <br><br><span class="inline-block mt-2 px-3 py-1 bg-blue-900/40 border border-blue-500/30 text-blue-300 text-xs rounded-lg font-bold">Aportado por: ${student}</span>`;
+
+            const newEvent = {
+                year: year,
+                title: title,
+                desc: desc,
+                img: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80", // Red neuronal abstracta para eventos custom
+                color: Math.random() > 0.5 ? 'blue' : 'purple'
+            };
+
+            const newIndex = timelineData.length;
+            timelineData.push(newEvent);
+            renderEventRow(newEvent, newIndex);
+            
+            closeModal();
+            updateRevealButton();
+
+            // Alerta in-app (Custom UI)
+            const alertBox = document.createElement('div');
+            alertBox.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold px-8 py-4 rounded-full shadow-[0_10px_40px_rgba(0,243,255,0.4)] font-futuristic z-[110] transition-all duration-500 translate-y-20 opacity-0 flex items-center gap-3 border border-cyan-300';
+            alertBox.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ¡Nodo Sincronizado en la Línea!`;
+            document.body.appendChild(alertBox);
+            
+            setTimeout(() => alertBox.classList.remove('translate-y-20', 'opacity-0'), 100);
+            
+            setTimeout(() => {
+                alertBox.classList.add('translate-y-20', 'opacity-0');
+                setTimeout(() => alertBox.remove(), 500);
+            }, 4000);
+        }
+
+        const gameData = [
+            {
+                img: "https://images.unsplash.com/photo-1550684376-efcbd6e3f031?auto=format&fit=crop&w=800&q=80",
+                type: "real",
+                desc: "¡Fotografía Real! Es una vista aérea de un río islandés cruzando arena negra volcánica. Los patrones de la naturaleza a vista de pájaro suelen parecer pinturas surrealistas o renderizados 3D."
+            },
+            {
+                img: "images/bug.jpg",
+                type: "ia",
+                desc: "¡Generada por IA!Aunque parece una macrofotografía hiperrealista de una chinche de arce sobre una hoja de palma, la nitidez irreal en los bordes y los patrones geométricos demasiado perfectos en la hoja delatan la firma de un modelo generativo."
+            },
+            {
+                img: "https://images.unsplash.com/photo-1524338198850-8a2ff63aaceb?auto=format&fit=crop&w=800&q=80",
+                type: "real",
+                desc: "¡Fotografía Real! Es macrofotografía de una gota de agua. La refracción de la luz genera una nitidez y texturas que hoy en día las IAs intentan imitar, pero a menudo sobre-suavizan."
+            },
+            {
+                img: "images/mar.jpg",
+                type: "ia",
+                desc: "¡Es generada por Inteligencia Artificial! Creada a partir de la instrucción (prompt) de ilustrar una balsa de migrantes en el Mediterráneo. A pesar de su realismo visual, el renderizado de la espuma del agua y las inconsistencias mecánicas en la estructura de la embarcación revelan la huella del algoritmo." },
+            {
+                img: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80",
+                type: "real",
+                desc: "¡Fotografía Real! Callejones de Tokio bajo la lluvia. Con la edición de color y la saturación del neón, la fotografía urbana a menudo luce exactamente como el arte conceptual que genera Midjourney."
+            }
+        ];
+
+        function initGame() {
+            const container = document.getElementById('gameContainer');
+            container.innerHTML = gameData.map((item, i) => `
+                <div class="glass-panel border border-gray-700/50 rounded-2xl overflow-hidden relative group transition-all hover:border-gray-500" id="game-card-${i}">
+                    <div class="h-64 w-full overflow-hidden bg-[#11131f] flex items-center justify-center">
+                        <img src="${item.img}" onerror="this.onerror=null; this.src='https://placehold.co/600x400/1a1d2d/00f3ff?text=Desafío+Visual';" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Desafío ${i+1}">
+                    </div>
+                    
+                    <div class="p-6 text-center" id="game-controls-${i}">
+                        <div class="flex gap-4 justify-center mt-2">
+                            <button onclick="checkGameGuess(${i}, 'real')" class="flex-1 py-3 bg-gradient-to-r from-blue-700 to-blue-600 rounded-xl hover:from-blue-600 hover:to-blue-500 font-bold uppercase tracking-wide border border-blue-400/30 transition-all shadow-lg hover:shadow-blue-500/30">FOTO REAL</button>
+                            <button onclick="checkGameGuess(${i}, 'ia')" class="flex-1 py-3 bg-gradient-to-r from-purple-700 to-purple-600 rounded-xl hover:from-purple-600 hover:to-purple-500 font-bold uppercase tracking-wide border border-purple-400/30 transition-all shadow-lg hover:shadow-purple-500/30">ES I.A.</button>
+                        </div>
+                    </div>
+
+                    <!-- Overlay de Resultado (Oculto) -->
+                    <div id="game-result-${i}" class="absolute inset-0 bg-[#0a0c12]/95 backdrop-blur-md hidden flex-col justify-center items-center p-6 text-center transition-all duration-300 opacity-0 z-20">
+                        <div id="game-icon-${i}" class="mb-4"></div>
+                        <h4 id="game-title-${i}" class="text-2xl font-futuristic font-bold mb-3"></h4>
+                        <p class="text-gray-300 text-sm leading-relaxed">${item.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function checkGameGuess(index, guess) {
+            const item = gameData[index];
+            const isCorrect = item.type === guess;
+            
+            const resultDiv = document.getElementById(`game-result-${index}`);
+            const iconDiv = document.getElementById(`game-icon-${index}`);
+            const titleDiv = document.getElementById(`game-title-${index}`);
+            
+            resultDiv.classList.remove('hidden');
+            // Forzar reflow
+            void resultDiv.offsetWidth;
+            resultDiv.classList.remove('opacity-0');
+
+            if (isCorrect) {
+                resultDiv.classList.add('border-2', 'border-green-500');
+                iconDiv.innerHTML = `<svg class="w-16 h-16 text-green-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                titleDiv.innerHTML = `<span class="text-green-400">¡CORRECTO!</span>`;
+            } else {
+                resultDiv.classList.add('border-2', 'border-red-500');
+                iconDiv.innerHTML = `<svg class="w-16 h-16 text-red-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                titleDiv.innerHTML = `<span class="text-red-400">INCORRECTO</span>`;
+            }
+        }
+
+        // Iniciar la aplicación al cargar
+        window.onload = initTimeline;
+
+    </script>
+</body>
+</html>
